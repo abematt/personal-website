@@ -25,9 +25,9 @@ export const data: Project[] = [
     languageColor: "#4ade80",
   },
   {
-    link: "",
+    link: "https://github.com/abematt/CMPE-259-NLP-Final-Project-Presentation",
     repo: "Few Shot Learning with Atlas Models",
-    website: "",
+    website: "https://quiet-bubblegum-a79bb1.netlify.app",
     description: "Finetuning Atlas models with custom dataset and parameter tuning",
     language: "Python",
     languageColor: "#0ea5e9"

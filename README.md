@@ -1,4 +1,4 @@
-## Currently Deployed at [www.abrahammathew.dev]. 
+## Currently Deployed at www.abrahammathew.dev. 
 
 Developed using, 
 Next.js

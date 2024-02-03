@@ -17,7 +17,7 @@ export const data: Project[] = [
     languageColor: "#fde047",
   },
   {
-    link: "https://github.com/abematt/Job-Application-Tracker",
+    link: "https://github.com/abematt/job-tracker-v2",
     repo: "Job Tracker",
     website: "",
     description: "App created in Next.js with MongoDB to track job applications",

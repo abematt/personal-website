@@ -8,7 +8,7 @@ export default function Home() {
         <p className="font-light text-muted-foreground">Hi!</p>
         <p className="font-light">
           I&apos;m a driven software engineer, continuously expanding my
-          expertise across full-stack development and emerging tech like AI/ML.
+          expertise across full-stack development AI/ML.
         </p>
         <p className="font-light">
           I thrive collaborating cross-culturally and cross-domain while taking

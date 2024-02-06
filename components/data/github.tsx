@@ -19,8 +19,8 @@ export const data: Project[] = [
   {
     link: "https://github.com/abematt/job-tracker-v2",
     repo: "Job Tracker",
-    website: "",
-    description: "App created in Next.js with MongoDB to track job applications",
+    website: "https://job-tracker-v2.netlify.app/",
+    description: "App created in React,Express & MongoDB to track job applications",
     language: "Next.js",
     languageColor: "#4ade80",
   },

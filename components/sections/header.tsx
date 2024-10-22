@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/tooltip";
 
 export default function Navbar() {
-  const link = `https://drive.google.com/uc?export=download&id=1UUmNnb0ByAmAGjFGoHmxaJOIx_PV85VT`;
+  const link = `https://drive.google.com/uc?export=download&id=1xZub7bbE27EY-3VFCXyOJZEZttnCSo2w`;
   return (
     <nav className="select-none bg-zinc-950 ">
       <div className="flex justify-between">

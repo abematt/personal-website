@@ -11,7 +11,7 @@ export const data: Project[] = [
   {
     link: "https://github.com/abematt/youtube-analysis",
     repo: "Youtube Analysis",
-    website: " https://main--effervescent-bombolone-b2ac4f.netlify.app/",
+    website: "",
     description: "A web application using HuggingFace.js to detect,analyze and classify sentiment of youtube videos",
     language: "Hugging.js",
     languageColor: "#fde047",
@@ -19,7 +19,7 @@ export const data: Project[] = [
   {
     link: "https://github.com/abematt/job-tracker-v2",
     repo: "Job Tracker",
-    website: "https://job-tracker-v2.netlify.app/",
+    website: "",
     description: "App created in React,Express & MongoDB to track job applications",
     language: "Next.js",
     languageColor: "#4ade80",

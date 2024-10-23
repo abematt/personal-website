@@ -17,8 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`bg-zinc-950 text-zinc-800 antialiased dark:text-zinc-200 ${inter.className}`}
+        className={`relative bg-zinc-950 text-zinc-800 antialiased dark:text-zinc-200 ${inter.className}`}
       >
+        {/* Background Pattern */}
         <div className="container flex min-h-screen flex-col py-4 md:w-[45rem] md:py-8">
           <Navbar />
           {children}

@@ -1,44 +1,68 @@
-import Image from "next/image";
+"use client";
 import { Projects } from "@/components/sections/projects";
-import { BackgroundLines } from "@/components/ui/background-lines";
+import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
+import { useState, useRef } from "react";
+import { motion } from "framer-motion";
+import MagneticButton from "@/components/ui/magnetic-button";
 
 export default function Home() {
+  const [isTextAnimationDone, setIsTextAnimationDone] = useState(false);
+  const projectSectionRef = useRef<HTMLDivElement | null>(null); // Specify the type as HTMLDivElement
+
+  // Split the intro text into multiple text blocks
+  const introTextBlocks = [
+    "Hi! I'm a Software Engineer currently based in San Francisco, CA.",
+    "I'm always evolving my full-stack expertise and have a keen interest in AI/ML.",
+    "I love taking ownership of projects that make an impact.",
+    "My specialties are React and Python.",
+  ];
+
+  // Handle button click to scroll to the projects section
+  const handleScrollToProjects = () => {
+    if (projectSectionRef.current) {
+      projectSectionRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
-      <main className="py-4">
+    <main className="space-y-12">
+      <section className="text-left py-8">
+        {/* Pass the introTextBlocks array to the TextGenerateEffect component */}
+        <TextGenerateEffect
+          textBlocks={introTextBlocks}
+          onComplete={() => setIsTextAnimationDone(true)} // Trigger when text animation is done
+        />
 
-        <section className="space-y-4 py-4">
-          <p className="font-light text-muted-foreground">Hi!</p>
+        {/* Show the button after the text animation is done
+        {isTextAnimationDone && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="flex justify-center mt-8"
+          >
+            <MagneticButton onClick={handleScrollToProjects} />
+          </motion.div>
+        )} */}
+      </section>
 
-          <p className="font-light">
-            I&apos;m a driven software engineer, continuously expanding my
-            expertise across full-stack development AI/ML.
-          </p>
-          <p className="font-light">
-            I thrive collaborating cross-culturally and cross-domain while
-            taking ownership of impactful projects.
-          </p>
-          <p className="font-light">
-            My main tech stack is <span className="font-semibold">Python</span>,{" "}
-            <span className="font-semibold">React</span>, and{" "}
-            <span className="font-semibold">Javascript</span>.
-          </p>
-        </section>
-
-        <section className="space-y-4 py-4">
-          <div>
-            <h1 className="text-lg font-semibold">Projects</h1>
-            <h2 className="font-light text-zinc-500 dark:text-zinc-400">
-              List of projects I&apos;ve worked on as part of course work and
-              personal projects
-            </h2>
-          </div>
-          {/* <HeadingText>Projects</HeadingText> */}
+      {/* Project section to scroll to */}
+      <section ref={projectSectionRef} className="">
+        <div className="">
+          <h1 className="text-lg font-semibold">Projects</h1>
+          <h2 className="font-light text-zinc-500 dark:text-zinc-400">
+            A list of projects I&apos;ve worked on through coursework and
+            personal initiatives
+          </h2>
+        </div>
+        <div className="flex items-center space-y-6 py-6">
           <div className="flex flex-col items-end gap-4">
-            <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2">
+            <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
               <Projects />
             </div>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
+    </main>
   );
 }

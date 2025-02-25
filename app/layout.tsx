@@ -5,8 +5,8 @@ import Navbar from "@/components/sections/header";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Abraham Mathew",
-  description: "Personal website",
+  title: "Abraham Mathew | Software Engineer",
+  description: "Personal website and portfolio of Abraham Mathew, Software Engineer",
 };
 
 export default function RootLayout({
@@ -19,7 +19,6 @@ export default function RootLayout({
       <body
         className={`relative bg-zinc-950 text-zinc-800 antialiased dark:text-zinc-200 ${inter.className}`}
       >
-        {/* Background Pattern */}
         <div className="container flex min-h-screen flex-col py-4 md:w-[45rem] md:py-8">
           <Navbar />
           {children}

@@ -67,7 +67,6 @@ export default function Home() {
         <div className="mb-6">
           <h2 className="text-2xl font-semibold mb-2">Work Experience</h2>
           <p className="font-light text-zinc-500 dark:text-zinc-400">
-            I switch a lot of companies. It's mostly about the culture.
           </p>
         </div>
         <WorkExperience />

@@ -21,13 +21,8 @@ export default function Navbar() {
       tooltip: "GitHub"
     },
     {
-      icon: <Twitter className="w-5 h-5" />,
-      url: "https://twitter.com/username",
-      tooltip: "Twitter"
-    },
-    {
       icon: <Linkedin className="w-5 h-5" />,
-      url: "https://linkedin.com/in/username",
+      url: "https://www.linkedin.com/in/abe-mathew-se/",
       tooltip: "LinkedIn"
     }
   ];

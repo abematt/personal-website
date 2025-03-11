@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Tooltip,
@@ -8,11 +8,28 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Github, Twitter, Linkedin, FileDown } from "lucide-react";
+import { Github, Linkedin, FileDown } from "lucide-react";
 
 export default function Navbar() {
   const resumeLink = `https://drive.google.com/uc?export=download&id=1xZub7bbE27EY-3VFCXyOJZEZttnCSo2w`;
   const [isHovered, setIsHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Check if we're on mobile on initial render and when window resizes
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Check on mount
+    checkIfMobile();
+    
+    // Add resize listener
+    window.addEventListener('resize', checkIfMobile);
+    
+    // Clean up
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
   
   const socialLinks = [
     {
@@ -35,11 +52,9 @@ export default function Navbar() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
           className="flex items-center"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
         >
           <a href="/" className="font-semibold text-xl">
-            {isHovered ? "abraham.dev" : "abrahammathew.dev"}
+            {isMobile ? "AM" : "abrahammathew.com"}
           </a>
         </motion.div>
         
@@ -47,45 +62,68 @@ export default function Navbar() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex items-center space-x-4"
+          className="flex items-center space-x-3 md:space-x-4"
         >
           {socialLinks.map((link, index) => (
-            <TooltipProvider key={index}>
+            isMobile ? (
+              <a 
+                key={index}
+                href={link.url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-zinc-400 hover:text-zinc-200 transition-colors"
+              >
+                {link.icon}
+              </a>
+            ) : (
+              <TooltipProvider key={index}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <a 
+                      href={link.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-zinc-400 hover:text-zinc-200 transition-colors"
+                    >
+                      {link.icon}
+                    </a>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{link.tooltip}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )
+          ))}
+          
+          {isMobile ? (
+            <a 
+              href={resumeLink} 
+              download="Abraham_Mathew_Resume" 
+              target="_blank"
+              className="text-zinc-400 hover:text-zinc-200 transition-colors"
+            >
+              <FileDown className="w-5 h-5" />
+            </a>
+          ) : (
+            <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <a 
-                    href={link.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
+                    href={resumeLink} 
+                    download="Abraham_Mathew_Resume" 
+                    target="_blank"
                     className="text-zinc-400 hover:text-zinc-200 transition-colors"
                   >
-                    {link.icon}
+                    <FileDown className="w-5 h-5" />
                   </a>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{link.tooltip}</p>
+                  <p>Download Resume</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          ))}
-          
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <a 
-                  href={resumeLink} 
-                  download="Abraham_Mathew_Resume" 
-                  target="_blank"
-                  className="text-zinc-400 hover:text-zinc-200 transition-colors"
-                >
-                  <FileDown className="w-5 h-5" />
-                </a>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Download Resume</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          )}
         </motion.div>
       </div>
     </nav>

@@ -42,44 +42,43 @@ export default function Home() {
             ))}
             
             {/* Hobbies section with emojis */}
-            <p className="flex items-center gap-1">
-              <span>In my free time, I enjoy </span>
-              {heroData.hobbies.map((hobby, index) => (
-                <React.Fragment key={index}>
-                  <span className="inline-flex items-center">
+            <div className="flex flex-wrap items-center gap-2 text-sm md:text-base">
+              <span>In my free time, I enjoy</span>
+              <div className="flex flex-wrap gap-2">
+                {heroData.hobbies.map((hobby, index) => (
+                  <span key={index} className="inline-flex items-center">
                     <span className="mr-1">{hobby.emoji}</span>
                     <span>{hobby.text}</span>
+                    {index < heroData.hobbies.length - 1 && <span>,</span>}
+                    {index === heroData.hobbies.length - 2 && <span> and</span>}
                   </span>
-                  {index < heroData.hobbies.length - 1 && <span>, </span>}
-                  {index === heroData.hobbies.length - 2 && <span>and </span>}
-                </React.Fragment>
-              ))}
-              <span>!</span>
-            </p>
+                ))}
+              </div>
+            </div>
 
             {/* Social links */}
-            <div className="flex flex-wrap gap-4 items-center">
+            <div className="flex flex-wrap gap-4 items-center mt-2">
               {heroData.socialLinks.map((social, index) => (
                 <a
                   key={index}
                   href={social.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 rounded-full hover:bg-zinc-700 transition-colors text-sm"
+                  className="flex items-center gap-2 py-1.5 rounded-full transition-colors text-sm"
                 >
-                  <span>{social.emoji}</span>
-                  <span className="font-medium">{social.platform}:</span>
+                  <span className="">You can check out some of my mobile photography here:</span>
                   <span className="text-blue-400">@{social.username}</span>
                 </a>
               ))}
             </div>
 
-            <div className="pt-4 flex flex-wrap gap-4">
-              <button 
+            {/* Action buttons */}
+            <div className="flex flex-wrap gap-4 mt-6">
+              <button
                 onClick={handleScrollToExperience}
-                className="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-colors flex items-center gap-2 border border-zinc-700 hover:border-zinc-600"
+                className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm md:text-base transition-colors"
               >
-                View Experience
+                See Experience
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -95,9 +94,9 @@ export default function Home() {
                   <polyline points="12 5 19 12 12 19"></polyline>
                 </svg>
               </button>
-              <button 
+              <button
                 onClick={handleScrollToProjects}
-                className="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-colors flex items-center gap-2 border border-zinc-700 hover:border-zinc-600"
+                className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-zinc-200 text-sm md:text-base transition-colors"
               >
                 See Projects
                 <svg

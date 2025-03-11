@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,64 +12,31 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ExternalLink, Github } from "lucide-react";
-import jobtrackergif from "@/components/data/assets/jobtrackergif.gif"
-
-interface Project {
-  link: string;
-  repo: string;
-  website: string;
-  description: string;
-  language: string;
-  languageColor: string;
-  thumbnail: any; // Added thumbnail property
-  tags: string[]; // Added tags property
-}
-
-// Updated data with thumbnails and tags
-export const projectData: Project[] = [
-  {
-    link: "https://github.com/abematt/youtube-analysis",
-    repo: "Youtube Analysis",
-    website: "",
-    description: "A web application using HuggingFace.js to detect, analyze and classify sentiment of YouTube videos. Built with React and Node.js backend.",
-    language: "Hugging.js",
-    languageColor: "#fde047",
-    thumbnail: "/api/placeholder/400/250",
-    tags: ["Sentiment Analysis", "NLP", "React", "Node.js"]
-  },
-  {
-    link: "https://github.com/abematt/job-tracker-v2",
-    repo: "Job Tracker",
-    website: "",
-    description: "App created in React, Express & MongoDB to track job applications. Features include resume parsing, interview scheduling, and application status tracking.",
-    language: "Next.js",
-    languageColor: "#4ade80",
-    thumbnail:jobtrackergif,
-    tags: ["Next.js", "MongoDB", "Resume Parsing", "Job Search"]
-  },
-  {
-    link: "https://github.com/abematt/CMPE-259-NLP-Final-Project-Presentation",
-    repo: "Few Shot Learning with Atlas Models",
-    website: "https://quiet-bubblegum-a79bb1.netlify.app",
-    description: "Finetuning Atlas models with custom dataset and parameter tuning for improved NLP performance with limited training examples.",
-    language: "Python",
-    languageColor: "#0ea5e9",
-    thumbnail: "/api/placeholder/400/250",
-    tags: ["NLP", "Few-Shot Learning", "Atlas Models", "Python"]
-  },
-  {
-    link: "https://github.com/abematt/272---HVAC-AnoML-Presentation",
-    repo: "HVAC AnoML",
-    website: "https://majestic-syrniki-4d8693.netlify.app/",
-    description: "ML project for anomaly detection in HVAC systems. Uses time-series data to predict equipment failures before they occur.",
-    language: "React",
-    languageColor: "#4ade80",
-    thumbnail: "/api/placeholder/400/250",
-    tags: ["ML", "Anomaly Detection", "Time Series", "React"]
-  },
-];
+import Image from "next/image";
+import { projectData } from "@/components/data/projects";
+import { highlightTechTerms } from "@/components/utils/highlight-tech";
 
 export function Projects() {
+  const [hoveredProject, setHoveredProject] = useState<number | null>(null);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+  // Initialize video refs array based on project data length
+  useEffect(() => {
+    videoRefs.current = videoRefs.current.slice(0, projectData.length);
+  }, []);
+
+  // Play all videos when component mounts
+  useEffect(() => {
+    videoRefs.current.forEach(video => {
+      if (video) {
+        video.play().catch(e => {
+          // Autoplay was prevented, we'll rely on the hover handler
+          console.log("Autoplay prevented:", e);
+        });
+      }
+    });
+  }, []);
+
   return (
     <>
       {projectData.map((project, index) => (
@@ -76,77 +44,83 @@ export function Projects() {
           key={index}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: index * 0.1 }}
+          transition={{ duration: 0.5, delay: index * 0.1 }}
+          className="flex flex-col h-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/30 transition-colors hover:bg-zinc-800/60 hover:border-zinc-700"
+          onMouseEnter={() => setHoveredProject(index)}
+          onMouseLeave={() => setHoveredProject(null)}
         >
-          <Card
-            className="border-zinc-800 bg-zinc-900/30 flex flex-col justify-between transition-all duration-300 ease-out hover:scale-105 hover:bg-zinc-900/50 hover:shadow-xl h-full overflow-hidden group"
-          >
-            {/* Thumbnail Section */}
-            <div className="w-full relative overflow-hidden">
-              <img
-                src={project.thumbnail}
-                alt={`${project.repo} thumbnail`}
-                className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-zinc-900/90 opacity-70 group-hover:opacity-50 transition-opacity duration-300"></div>
+          <div className="flex flex-col h-full">
+            <div className="relative aspect-video overflow-hidden">
+              {project.media.type === "image" && (
+                <Image
+                  src={project.media.src}
+                  alt={project.media.alt}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              )}
+
+              {project.media.type === "gif" && (
+                <Image
+                  src={project.media.src}
+                  alt={project.media.alt}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  unoptimized // Important for GIFs to animate
+                />
+              )}
+
+              {project.media.type === "video" && (
+                <video
+                  ref={el => videoRefs.current[index] = el}
+                  src={project.media.src}
+                  poster={project.media.poster}
+                  muted
+                  loop
+                  playsInline
+                  autoPlay
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              )}
             </div>
-            
-            <CardHeader className="relative z-10 mt-2">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <Github className="w-4 h-4 text-zinc-400 group-hover:text-zinc-100 transition-colors duration-200" />
-                  <a
-                    target="_blank"
-                    href={project.link}
-                    rel="noopener noreferrer"
-                    aria-label={project.repo}
-                  >
-                    <CardTitle className="text-base hover:underline hover:text-blue-400 transition-colors duration-200">
-                      {project.repo}
-                    </CardTitle>
-                  </a>
-                </div>
+
+            <div className="flex flex-col flex-grow p-4">
+              <h3 className="text-lg font-medium text-zinc-200 mb-2 flex items-start">
+                {project.repo}
+              </h3>
+              <p className="text-sm text-zinc-400 mb-4 flex-grow min-h-[80px]">
+                {highlightTechTerms(project.description)}
+              </p>
+
+              <div className="flex items-center space-x-4 pt-4 mt-auto">
                 <a
+                  href={project.link}
                   target="_blank"
-                  href={project.website || project.link}
                   rel="noopener noreferrer"
-                  aria-label="Visit project's live url or repo"
-                  className="hover:text-blue-400 transition-colors duration-200"
+                  className="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-zinc-200 transition-all flex items-center gap-2"
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label="View GitHub Repository"
                 >
-                  <ExternalLink className="w-5 h-5" />
+                  <Github className="w-4 h-4" />
+                  <span className="text-xs">GitHub</span>
                 </a>
-              </div>
-              <CardDescription className="text-sm font-light mt-3 text-zinc-400 group-hover:text-zinc-300 transition-colors duration-200">
-                {project.description}
-              </CardDescription>
-            </CardHeader>
-            
-            <CardFooter className="flex flex-col items-start gap-3 pb-4">
-              {/* Language Badge */}
-              <Badge
-                className="text-xs px-2 py-1 font-medium transition-all duration-300 group-hover:shadow-glow"
-                style={{
-                  backgroundColor: `${project.languageColor}20`, // 20% opacity of the language color
-                  color: project.languageColor,
-                  border: `1px solid ${project.languageColor}40`, // 40% opacity border
-                }}
-              >
-                {project.language}
-              </Badge>
-              
-              {/* Tags Section */}
-              <div className="flex flex-wrap gap-2 mt-1">
-                {project.tags.map((tag, tagIndex) => (
-                  <span 
-                    key={tagIndex}
-                    className="text-xs px-2 py-1 rounded-full bg-zinc-800/80 text-zinc-400 border border-zinc-700/50 group-hover:bg-zinc-700/80 group-hover:text-zinc-300 transition-colors duration-300"
+
+                {project.website && (
+                  <a
+                    href={project.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-zinc-200 transition-all flex items-center gap-2"
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label="View Live Website"
                   >
-                    {tag}
-                  </span>
-                ))}
+                    <ExternalLink className="w-4 h-4" />
+                    <span className="text-xs">Website</span>
+                  </a>
+                )}
               </div>
-            </CardFooter>
-          </Card>
+            </div>
+          </div>
         </motion.div>
       ))}
     </>

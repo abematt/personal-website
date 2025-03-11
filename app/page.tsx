@@ -135,7 +135,7 @@ export default function Home() {
         <div className="mb-6">
           <h2 className="text-2xl font-semibold mb-2">Projects</h2>
           <p className="font-light text-zinc-500 dark:text-zinc-400">
-            A list of projects I've worked on through coursework and personal initiatives
+            A list of projects I&apos;ve worked on through coursework and personal initiatives
           </p>
         </div>
         <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">

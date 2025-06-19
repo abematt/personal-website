@@ -36,7 +36,7 @@ export async function getPageContentBySlug(slug: string) {
 
     return { recordMap, title, date }
   } catch (error) {
-    console.error('Error in getPageContentBySlug:', error)
+    console.log('Error in getPageContentBySlug:', error)
     throw error
   }
 }

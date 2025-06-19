@@ -8,7 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Github, Linkedin, FileDown } from "lucide-react";
+import { Github, Linkedin, FileDown, BookOpen } from "lucide-react";
 
 export default function Navbar() {
   const resumeLink = `https://drive.google.com/uc?export=download&id=1xZub7bbE27EY-3VFCXyOJZEZttnCSo2w`;
@@ -64,6 +64,35 @@ export default function Navbar() {
           transition={{ duration: 0.5 }}
           className="flex items-center space-x-3 md:space-x-4"
         >
+          {/* Blog Link */}
+          {isMobile ? (
+            <a 
+              href="/blog"
+              className="text-zinc-400 hover:text-zinc-200 transition-colors"
+            >
+              <BookOpen className="w-5 h-5" />
+            </a>
+          ) : (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a 
+                    href="/blog"
+                    className="text-zinc-400 hover:text-zinc-200 transition-colors font-medium"
+                  >
+                    Blog
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>View Blog</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          
+          {/* Divider for visual separation */}
+          <div className="hidden md:block w-px h-4 bg-zinc-600"></div>
+          
           {socialLinks.map((link, index) => (
             isMobile ? (
               <a 

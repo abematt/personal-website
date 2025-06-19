@@ -32,7 +32,7 @@ export default async function BlogIndexPage() {
           const title =
             post.properties.Title.title[0]?.plain_text || 'Untitled'
           const slug =
-            post.properties.Slug.rich_text[0]?.plain_text || '#'
+            post.properties.Slug?.formula?.string || '#'
           const date = post.properties.Date.date?.start
           
           // Format the date nicely

@@ -2,6 +2,8 @@
 import { getPageContentBySlug } from '@/lib/notion-posts'
 import { SimpleNotionRenderer } from '@/components/ClientNotion'
 
+export const dynamic = 'force-dynamic'
+
 export default async function BlogPost({ params }: { params: { slug: string } }) {
   const { blocks, title, date } = await getPageContentBySlug(params.slug)
   if (!blocks) return <div>Post not found</div>

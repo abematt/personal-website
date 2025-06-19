@@ -21,6 +21,8 @@ async function getPosts() {
   }
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function BlogIndexPage() {
   const posts = await getPosts()
 

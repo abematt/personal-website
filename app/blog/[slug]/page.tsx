@@ -1,10 +1,10 @@
 // app/blog/[slug]/page.tsx
 import { getPageContentBySlug } from '@/lib/notion-posts'
-import { ClientNotion } from '@/components/ClientNotion'
+import { SimpleNotionRenderer } from '@/components/ClientNotion'
 
 export default async function BlogPost({ params }: { params: { slug: string } }) {
-  const { recordMap, title, date } = await getPageContentBySlug(params.slug)
-  if (!recordMap) return <div>Post not found</div>
+  const { blocks, title, date } = await getPageContentBySlug(params.slug)
+  if (!blocks) return <div>Post not found</div>
 
   // Format the date nicely
   const formattedDate = date 
@@ -34,7 +34,7 @@ export default async function BlogPost({ params }: { params: { slug: string } })
 
       {/* Article Content */}
       <div className="notion-content">
-        <ClientNotion recordMap={recordMap} />
+        <SimpleNotionRenderer blocks={blocks} />
       </div>
     </article>
   )

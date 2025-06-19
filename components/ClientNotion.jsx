@@ -1,90 +1,72 @@
-// components/ClientNotion.tsx
+// components/SimpleNotionRenderer.jsx
 'use client'
-import { NotionRenderer } from 'react-notion-x'
-import 'react-notion-x/src/styles.css'
 
-export function ClientNotion({ recordMap, fullPage = false, darkMode = false }) {
+export function SimpleNotionRenderer({ blocks }) {
+  const renderBlock = (block) => {
+    const { type, id } = block
+    const value = block[type]
+
+    switch (type) {
+      case 'paragraph':
+        return (
+          <p key={id} className="mb-4 text-zinc-200">
+            {value.rich_text.map((text, i) => (
+              <span key={i}>{text.plain_text}</span>
+            ))}
+          </p>
+        )
+      case 'heading_1':
+        return (
+          <h1 key={id} className="text-3xl font-bold mb-4 text-white">
+            {value.rich_text.map((text, i) => (
+              <span key={i}>{text.plain_text}</span>
+            ))}
+          </h1>
+        )
+      case 'heading_2':
+        return (
+          <h2 key={id} className="text-2xl font-bold mb-3 text-white">
+            {value.rich_text.map((text, i) => (
+              <span key={i}>{text.plain_text}</span>
+            ))}
+          </h2>
+        )
+      case 'heading_3':
+        return (
+          <h3 key={id} className="text-xl font-bold mb-2 text-white">
+            {value.rich_text.map((text, i) => (
+              <span key={i}>{text.plain_text}</span>
+            ))}
+          </h3>
+        )
+      case 'bulleted_list_item':
+        return (
+          <li key={id} className="mb-2 text-zinc-200">
+            {value.rich_text.map((text, i) => (
+              <span key={i}>{text.plain_text}</span>
+            ))}
+          </li>
+        )
+      case 'numbered_list_item':
+        return (
+          <li key={id} className="mb-2 text-zinc-200">
+            {value.rich_text.map((text, i) => (
+              <span key={i}>{text.plain_text}</span>
+            ))}
+          </li>
+        )
+      default:
+        return (
+          <div key={id} className="mb-4 text-zinc-200">
+            ❓ Unsupported block ({type})
+          </div>
+        )
+    }
+  }
+
   return (
-    <div className="notion-renderer-wrapper">
-      <style jsx global>{`
-        /* Custom typography overrides for Notion content */
-        .notion-page {
-          background: transparent !important;
-          color: white !important;
-        }
-        
-        .notion-text {
-          color: rgb(229, 231, 235) !important; /* zinc-200 */
-        }
-        
-        .notion-h1, .notion-h2, .notion-h3 {
-          color: white !important;
-          font-weight: 700 !important;
-        }
-        
-        .notion-h1 {
-          font-size: 2rem !important;
-          margin: 2rem 0 1rem 0 !important;
-        }
-        
-        .notion-h2 {
-          font-size: 1.5rem !important;
-          margin: 1.5rem 0 0.75rem 0 !important;
-        }
-        
-        .notion-h3 {
-          font-size: 1.25rem !important;
-          margin: 1.25rem 0 0.5rem 0 !important;
-        }
-        
-        .notion-list {
-          color: rgb(229, 231, 235) !important;
-        }
-        
-        .notion-quote {
-          background: rgb(39, 39, 42) !important; /* zinc-800 */
-          border-left: 4px solid rgb(75, 85, 99) !important; /* zinc-600 */
-          color: rgb(229, 231, 235) !important;
-          padding: 1rem !important;
-          margin: 1rem 0 !important;
-        }
-        
-        .notion-code {
-          background: rgb(39, 39, 42) !important; /* zinc-800 */
-          color: rgb(34, 197, 94) !important; /* green-500 */
-          padding: 0.25rem 0.5rem !important;
-          border-radius: 0.25rem !important;
-        }
-        
-        .notion-callout {
-          background: rgb(39, 39, 42) !important; /* zinc-800 */
-          border: 1px solid rgb(63, 63, 70) !important; /* zinc-700 */
-          color: rgb(229, 231, 235) !important;
-        }
-
-        /* Link styling */
-        .notion-link {
-          color: rgb(96, 165, 250) !important; /* blue-400 */
-          text-decoration: underline !important;
-        }
-        
-        .notion-link:hover {
-          color: rgb(147, 197, 253) !important; /* blue-300 */
-        }
-        
-        /* Better paragraph spacing */
-        .notion-text p {
-          margin: 0.75rem 0 !important;
-          line-height: 1.7 !important;
-        }
-      `}</style>
-      
-      <NotionRenderer 
-        recordMap={recordMap} 
-        fullPage={false} 
-        darkMode={true}
-        className="notion-content"
-      />
+    <div className="space-y-4">
+      {blocks.map((block) => renderBlock(block))}
     </div>
   )
 }

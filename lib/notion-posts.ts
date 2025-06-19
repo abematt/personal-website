@@ -1,42 +1,34 @@
 import { notion } from './notion'
-import { NotionAPI } from 'notion-client'
-
-const notionApi = new NotionAPI()
 
 export async function getPageContentBySlug(slug: string) {
-  try {
-    const response = await notion.databases.query({
-      database_id: process.env.NOTION_DATABASE_ID!,
-      filter: {
-        property: 'Slug',
-        rich_text: { equals: slug },
-      },
-    })
+  const response = await notion.databases.query({
+    database_id: process.env.NOTION_DATABASE_ID!,
+    filter: {
+      property: 'Slug',
+      rich_text: { equals: slug },
+    },
+  })
 
-    const page = response.results[0]
-    if (!page) return { recordMap: null, title: null, date: null }
+  const page = response.results[0]
+  if (!page) return { blocks: null, title: null, date: null }
 
-    // Type guard to ensure we have a PageObjectResponse
-    if (!('properties' in page)) return { recordMap: null, title: null, date: null }
+  if (!('properties' in page)) return { blocks: null, title: null, date: null }
 
-    console.log('About to call notionApi.getPage with page.id:', page.id)
-    const recordMap = await notionApi.getPage(page.id)
-    console.log('Successfully got recordMap')
-    
-    const titleProperty = page.properties.Title
-    const title = (titleProperty && 'title' in titleProperty && Array.isArray(titleProperty.title) && titleProperty.title.length > 0) 
-      ? titleProperty.title[0]?.plain_text || 'Untitled'
-      : 'Untitled'
+  // Get all blocks using official API
+  const blocks = await notion.blocks.children.list({
+    block_id: page.id,
+    page_size: 100,
+  })
 
-    // Extract the date
-    const dateProperty = page.properties.Date
-    const date = dateProperty && 'date' in dateProperty && dateProperty.date?.start
-      ? dateProperty.date.start
-      : null
+  const titleProperty = page.properties.Title
+  const title = (titleProperty && 'title' in titleProperty && Array.isArray(titleProperty.title) && titleProperty.title.length > 0) 
+    ? titleProperty.title[0]?.plain_text || 'Untitled'
+    : 'Untitled'
 
-    return { recordMap, title, date }
-  } catch (error) {
-    console.log('Error in getPageContentBySlug:', error)
-    throw error
-  }
+  const dateProperty = page.properties.Date
+  const date = dateProperty && 'date' in dateProperty && dateProperty.date?.start
+    ? dateProperty.date.start
+    : null
+
+  return { blocks: blocks.results, title, date }
 }

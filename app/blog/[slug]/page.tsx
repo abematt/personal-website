@@ -2,7 +2,7 @@
 import { getPageContentBySlug } from '@/lib/notion-posts'
 import { SimpleNotionRenderer } from '@/components/ClientNotion'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600 
 
 export default async function BlogPost({ params }: { params: { slug: string } }) {
   const { blocks, title, date } = await getPageContentBySlug(params.slug)

@@ -1,6 +1,8 @@
 import { notion } from '@/lib/notion'
 import Link from 'next/link'
 
+export const revalidate = 3600 
+
 async function getPosts() {
   try {
     // Query for the pages
@@ -21,7 +23,6 @@ async function getPosts() {
   }
 }
 
-export const dynamic = 'force-dynamic'
 
 export default async function BlogIndexPage() {
   const posts = await getPosts()

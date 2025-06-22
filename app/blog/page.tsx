@@ -1,7 +1,7 @@
 import { notion } from '@/lib/notion'
 import Link from 'next/link'
 
-export const revalidate = 3600 
+export const revalidate = 300 // 1 minute instead of 1 hour
 
 async function getPosts() {
   try {

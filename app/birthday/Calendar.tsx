@@ -1,9 +1,10 @@
 "use client";
 
-import { Canvas, useFrame, ThreeEvent } from "@react-three/fiber";
+import { Canvas, useFrame, useThree, ThreeEvent } from "@react-three/fiber";
 import {
   MeshPortalMaterial,
   OrbitControls,
+  PointerLockControls,
   RoundedBox,
   Text,
 } from "@react-three/drei";
@@ -22,6 +23,7 @@ import {
   Object3D,
   PlaneGeometry,
   Quaternion,
+  Vector2,
   Vector3,
   Vector4,
 } from "three";
@@ -581,11 +583,9 @@ type DoorProps = {
   isPast: boolean;
 };
 
-function Door({ config, index, total, onOpen, onClose, disabled, isPast }: DoorProps) {
+function Door({ config, index, total, onOpen, onClose, disabled }: DoorProps) {
   const hingeRef = useRef<Group>(null);
-  // Past-day doors start open and stay that way — the showcase next to them
-  // is the scene's way of marking that day as complete.
-  const [open, setOpen] = useState(isPast);
+  const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [shake, setShake] = useState(0);
 
@@ -605,7 +605,7 @@ function Door({ config, index, total, onOpen, onClose, disabled, isPast }: DoorP
 
   useFrame((_, delta) => {
     if (!hingeRef.current) return;
-    const target = open ? -Math.PI * 0.75 : 0;
+    const target = open ? -Math.PI * 0.5 : 0;
     hingeRef.current.rotation.y +=
       (target - hingeRef.current.rotation.y) * Math.min(1, delta * 6);
     if (shake > 0) {
@@ -616,7 +616,7 @@ function Door({ config, index, total, onOpen, onClose, disabled, isPast }: DoorP
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
-    if (disabled || isPast) return;
+    if (disabled) return;
     if (!unlocked) {
       setShake(0.4);
       return;
@@ -1124,6 +1124,25 @@ function Silk({
       p.x += vx + windX * dt * dt * windScale;
       p.y += vy + gravity * dt * dt;
       p.z += vz + windZ * dt * dt * windScale;
+
+      // Player push: if the cloth point is within the player's body cylinder,
+      // shove it horizontally outward. Only acts on lower rows (waist-down)
+      // so the top of the silk doesn't peel away at head-height.
+      if (PLAYER_POS.y > -100 && row > 1) {
+        const pdy = p.y - PLAYER_POS.y;
+        if (pdy < 0.4 && pdy > -1.7) {
+          const ddx = p.x - PLAYER_POS.x;
+          const ddz = p.z - PLAYER_POS.z;
+          const pushR = PLAYER_RADIUS + 0.15;
+          const d2 = ddx * ddx + ddz * ddz;
+          if (d2 < pushR * pushR && d2 > 1e-6) {
+            const d = Math.sqrt(d2);
+            const k = (pushR - d) / d;
+            p.x += ddx * k;
+            p.z += ddz * k;
+          }
+        }
+      }
     }
 
     // Constraint relaxation — more iterations = stiffer cloth.
@@ -1598,6 +1617,7 @@ function GrassField() {
       args={[bladeGeometry, material, GRASS_COUNT]}
       castShadow
       receiveShadow
+      frustumCulled={false}
     />
   );
 }
@@ -2116,16 +2136,24 @@ function ShowcaseItem({
   });
   const scale =
     kind === "ukulele"
-      ? 0.55
+      ? 0.42
       : kind === "watch"
-        ? 0.9
+        ? 0.5
         : kind === "cake"
           ? 0.9
           : kind === "tickets"
             ? 0.4
             : 0.8;
+  // Some items aren't centered around y=0 in their local space, so nudge them
+  // vertically to sit nicely inside the glass case.
+  const yOffset =
+    kind === "ukulele" ? 0.06 : kind === "watch" ? 0.08 : 0;
   return (
-    <group ref={ref} position={position} scale={scale}>
+    <group
+      ref={ref}
+      position={[position[0], position[1] + yOffset, position[2]]}
+      scale={scale}
+    >
       <ItemMesh kind={kind} />
     </group>
   );
@@ -2263,16 +2291,224 @@ type Presenting = {
   doorConfig: DoorConfig;
 };
 
+// First-person walk mode: PointerLockControls for mouse look, WASD for
+// movement on the XZ plane, clamped to a radius around the origin so the
+// player can wander as far as the tree (and a touch past it).
+const WALK_RADIUS = 10;
+const WALK_EYE_HEIGHT = 1.6;
+const WALK_SPEED = 3.2;
+const PLAYER_RADIUS = 0.3;
+// Doors stand along z=0 facing +Z; this is the closest the player can get
+// before an invisible wall stops them from walking through into the portals.
+const DOOR_WALL_Z = 0.6;
+
+// Shared player world-position used for cloth + future scene reactions.
+// y is set far below ground when not in walk mode so distance checks miss.
+const PLAYER_POS = new Vector3(0, -999, 0);
+
+// While pointer is locked, the browser freezes clientX/clientY, so the
+// Canvas event compute below falls back to screen-center for raycasting
+// (i.e. you click whatever is under the crosshair, not under the stale cursor).
+const WALK_POINTER_LOCKED = { current: false };
+
+// Circle obstacles for first-person collision (xz, radius). The radii are
+// generous bubbles around each prop — the player slides around them rather
+// than wedging into corners, which is the right feel for a casual walk-around.
+const SCENE_OBSTACLES: { x: number; z: number; r: number }[] = [
+  { x: -4.5, z: -6, r: 0.7 }, // tree trunk + close foliage
+  { x: BOOKSHELF_POSITION[0], z: BOOKSHELF_POSITION[2], r: 0.95 },
+  { x: PICNIC_POSITION[0], z: PICNIC_POSITION[2], r: 1.4 },
+  { x: YOGA_CENTER[0], z: YOGA_CENTER[1], r: 1.3 },
+];
+
+function FirstPersonControls({ onExit }: { onExit: () => void }) {
+  const { camera, gl, scene, raycaster } = useThree();
+  const keys = useRef({ w: false, a: false, s: false, d: false });
+  const forward = useRef(new Vector3());
+  const right = useRef(new Vector3());
+  const move = useRef(new Vector3());
+  // Door X-positions — walls live only where doors actually stand, so the
+  // player can slip between/around them to reach the area behind.
+  const doorXs = useMemo(() => {
+    const total = BIRTHDAY_CONFIG.doors.length;
+    return BIRTHDAY_CONFIG.doors.map(
+      (_, i) => (i - (total - 1) / 2) * SPACING,
+    );
+  }, []);
+  // Head-bob phase advances with footstep cadence while moving and decays
+  // back to neutral when stopped, so the camera settles instead of jerking.
+  const bobPhase = useRef(0);
+  const bobAmount = useRef(0);
+
+  useEffect(() => {
+    // Snap camera into the walkable area at eye height.
+    const startX = 0;
+    const startZ = Math.min(camera.position.z, WALK_RADIUS - 1);
+    camera.position.set(
+      startX,
+      GROUND_Y + terrainHeight(startX, startZ) + WALK_EYE_HEIGHT,
+      startZ,
+    );
+
+    const down = (e: KeyboardEvent) => {
+      const k = e.key.toLowerCase();
+      if (k === "w" || k === "arrowup") keys.current.w = true;
+      else if (k === "s" || k === "arrowdown") keys.current.s = true;
+      else if (k === "a" || k === "arrowleft") keys.current.a = true;
+      else if (k === "d" || k === "arrowright") keys.current.d = true;
+      else if (k === "escape") onExit();
+    };
+    const up = (e: KeyboardEvent) => {
+      const k = e.key.toLowerCase();
+      if (k === "w" || k === "arrowup") keys.current.w = false;
+      else if (k === "s" || k === "arrowdown") keys.current.s = false;
+      else if (k === "a" || k === "arrowleft") keys.current.a = false;
+      else if (k === "d" || k === "arrowright") keys.current.d = false;
+    };
+    // Pointer-locked clicks need a manual raycast from screen-center —
+    // the browser freezes clientX/Y while locked, so r3f's normal pointer
+    // event would otherwise hit whatever was under the (stale) cursor.
+    const center = new Vector2(0, 0);
+    const onClick = () => {
+      if (!WALK_POINTER_LOCKED.current) return;
+      raycaster.setFromCamera(center, camera);
+      const hits = raycaster.intersectObjects(scene.children, true);
+      for (const hit of hits) {
+        let obj: typeof hit.object | null = hit.object;
+        while (obj) {
+          // r3f stores prop-derived event handlers on the object's __r3f slot.
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const handlers = (obj as any).__r3f?.handlers;
+          if (handlers?.onClick) {
+            handlers.onClick({
+              ...hit,
+              eventObject: obj,
+              stopPropagation: () => {},
+              nativeEvent: undefined,
+            });
+            return;
+          }
+          obj = obj.parent;
+        }
+      }
+    };
+    window.addEventListener("click", onClick);
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    return () => {
+      window.removeEventListener("click", onClick);
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+      // Park player far below so cloth/silk distance checks miss it again.
+      PLAYER_POS.set(0, -999, 0);
+      WALK_POINTER_LOCKED.current = false;
+    };
+  }, [camera, gl, scene, raycaster, onExit]);
+
+  useFrame((_, delta) => {
+    const k = keys.current;
+    const fwd = (k.w ? 1 : 0) - (k.s ? 1 : 0);
+    const strafe = (k.d ? 1 : 0) - (k.a ? 1 : 0);
+    const moving = fwd !== 0 || strafe !== 0;
+
+    let nx = camera.position.x;
+    let nz = camera.position.z;
+
+    if (moving) {
+      camera.getWorldDirection(forward.current);
+      forward.current.y = 0;
+      forward.current.normalize();
+      // right = forward × worldUp(0,1,0)
+      right.current.set(-forward.current.z, 0, forward.current.x);
+
+      move.current
+        .set(0, 0, 0)
+        .addScaledVector(forward.current, fwd)
+        .addScaledVector(right.current, strafe)
+        .normalize()
+        .multiplyScalar(WALK_SPEED * delta);
+
+      nx += move.current.x;
+      nz += move.current.z;
+      // Invisible wall but only where doors stand — gaps between/around them
+      // remain walkable so the player can reach the area behind the row.
+      // Two-sided: the side the player was already on is the side they stay
+      // on, so circling around a door from behind doesn't teleport them.
+      const halfDoor = DOOR_WIDTH / 2 + 0.1;
+      const blockedByDoor = doorXs.some((dx) => Math.abs(nx - dx) < halfDoor);
+      if (blockedByDoor) {
+        const wasInFront = camera.position.z >= 0;
+        if (wasInFront && nz < DOOR_WALL_Z) nz = DOOR_WALL_Z;
+        else if (!wasInFront && nz > -DOOR_WALL_Z) nz = -DOOR_WALL_Z;
+      }
+      // Circle collision: push the player out of any prop bubble. Looped
+      // twice so a push that lands inside a neighboring obstacle still
+      // resolves cleanly.
+      for (let pass = 0; pass < 2; pass++) {
+        for (const o of SCENE_OBSTACLES) {
+          const dx = nx - o.x;
+          const dz = nz - o.z;
+          const minD = o.r + PLAYER_RADIUS;
+          const d2 = dx * dx + dz * dz;
+          if (d2 < minD * minD) {
+            const d = Math.sqrt(d2) || 1e-5;
+            nx = o.x + (dx / d) * minD;
+            nz = o.z + (dz / d) * minD;
+          }
+        }
+      }
+      const r = Math.hypot(nx, nz);
+      if (r > WALK_RADIUS) {
+        nx = (nx / r) * WALK_RADIUS;
+        nz = (nz / r) * WALK_RADIUS;
+      }
+      camera.position.x = nx;
+      camera.position.z = nz;
+    }
+
+    // Publish player world position so other scene parts (e.g. silk cloth)
+    // can react. Using a sentinel low Y when stopped is fine; the position
+    // is overwritten every frame in walk mode.
+    PLAYER_POS.copy(camera.position);
+
+    // Head bob: ramp amplitude up while moving, decay when stopped. Phase
+    // advances at a footstep cadence (~2 steps/sec at WALK_SPEED).
+    const bobTarget = moving ? 1 : 0;
+    bobAmount.current += (bobTarget - bobAmount.current) * Math.min(1, delta * 6);
+    if (moving) bobPhase.current += delta * WALK_SPEED * 2.0;
+    const bob = Math.sin(bobPhase.current) * 0.05 * bobAmount.current;
+
+    camera.position.y =
+      GROUND_Y + terrainHeight(nx, nz) + WALK_EYE_HEIGHT + bob;
+  });
+
+  return (
+    <PointerLockControls
+      onLock={() => {
+        WALK_POINTER_LOCKED.current = true;
+      }}
+      onUnlock={() => {
+        WALK_POINTER_LOCKED.current = false;
+        onExit();
+      }}
+    />
+  );
+}
+
 function Scene({
   onOpen,
   onClose,
   dropped,
   presenting,
+  walkMode,
+  onExitWalk,
 }: {
   onOpen: (door: DoorConfig, x: number) => void;
   onClose: (door: DoorConfig) => void;
   dropped: DroppedItem[];
   presenting: Presenting | null;
+  walkMode: boolean;
+  onExitWalk: () => void;
 }) {
   return (
     <>
@@ -2343,17 +2579,21 @@ function Scene({
         ))}
       </Physics>
 
-      <OrbitControls
-        enablePan={false}
-        enableZoom
-        minDistance={4.5}
-        maxDistance={14}
-        zoomSpeed={0.5}
-        minPolarAngle={Math.PI / 2.4}
-        maxPolarAngle={Math.PI / 2.05}
-        minAzimuthAngle={-Math.PI / 8}
-        maxAzimuthAngle={Math.PI / 8}
-      />
+      {walkMode ? (
+        <FirstPersonControls onExit={onExitWalk} />
+      ) : (
+        <OrbitControls
+          enablePan={false}
+          enableZoom
+          minDistance={4.5}
+          maxDistance={14}
+          zoomSpeed={0.5}
+          minPolarAngle={Math.PI / 2.4}
+          maxPolarAngle={Math.PI / 2.05}
+          minAzimuthAngle={-Math.PI / 8}
+          maxAzimuthAngle={Math.PI / 8}
+        />
+      )}
     </>
   );
 }
@@ -2361,6 +2601,7 @@ function Scene({
 export default function Calendar() {
   const [dropped, setDropped] = useState<DroppedItem[]>([]);
   const [presenting, setPresenting] = useState<Presenting | null>(null);
+  const [walkMode, setWalkMode] = useState(false);
 
   const handleOpen = useCallback(
     (door: DoorConfig, x: number) => {
@@ -2438,9 +2679,24 @@ export default function Calendar() {
             onClose={handleClose}
             dropped={dropped}
             presenting={presenting}
+            walkMode={walkMode}
+            onExitWalk={() => setWalkMode(false)}
           />
         </Canvas>
       </div>
+
+      <button
+        type="button"
+        onClick={() => setWalkMode((v) => !v)}
+        className="fixed bottom-4 right-4 z-10 rounded-full bg-black/60 px-4 py-2 text-sm font-medium text-white backdrop-blur hover:bg-black/80"
+      >
+        {walkMode ? "Exit walk (Esc)" : "Walk around"}
+      </button>
+      {walkMode && (
+        <div className="pointer-events-none fixed bottom-4 left-1/2 z-10 -translate-x-1/2 rounded-md bg-black/50 px-3 py-1.5 text-xs text-white backdrop-blur">
+          WASD / arrows to move · mouse to look · Esc to exit
+        </div>
+      )}
 
       {presenting && (
         <InspectModal doorConfig={presenting.doorConfig} onDone={handleDone} />

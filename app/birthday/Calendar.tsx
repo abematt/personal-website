@@ -2377,8 +2377,9 @@ function FirstPersonControls({ onExit }: { onExit: () => void }) {
         let obj: typeof hit.object | null = hit.object;
         while (obj) {
           // r3f stores prop-derived event handlers on the object's __r3f slot.
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const handlers = (obj as any).__r3f?.handlers;
+          const handlers = (obj as unknown as {
+            __r3f?: { handlers?: { onClick?: (e: unknown) => void } };
+          }).__r3f?.handlers;
           if (handlers?.onClick) {
             handlers.onClick({
               ...hit,

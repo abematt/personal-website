@@ -4,6 +4,7 @@ import { projectData } from "@/components/data/projects";
 import { experiences } from "@/components/data/experience";
 import { ContributionGraph } from "@/components/contribution-graph";
 import { ProjectLogo } from "@/components/project-logo";
+import { GitHubIcon, GlobeIcon } from "@/components/icons";
 import { getContributions } from "@/lib/github";
 import { getPosts } from "@/lib/notion-posts";
 
@@ -25,7 +26,11 @@ function formatPostDate(date: string) {
   });
 }
 
-const rowClass = "flex flex-wrap justify-between gap-x-4 gap-y-1 border-t border-zinc-900 py-2.5";
+// Each section sits in a softly bordered panel with a faint highlight on its top edge.
+const panelClass =
+  "flex flex-col gap-3.5 rounded-2xl border border-zinc-800/70 bg-zinc-900/20 p-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] sm:p-5";
+const rowClass = "flex flex-wrap justify-between gap-x-4 gap-y-1 py-2.5";
+const rowsClass = "-my-2.5 divide-y divide-zinc-800/60";
 const dateClass = "font-mono text-[13px] text-zinc-400";
 
 export default async function Home() {
@@ -38,8 +43,8 @@ export default async function Home() {
   ]);
 
   return (
-    <main className="mx-auto flex w-full max-w-[600px] flex-col gap-16 pb-20 pt-12 text-[15px] leading-relaxed md:pt-20">
-      <header className="flex flex-col gap-5">
+    <main className="mx-auto flex w-full max-w-[600px] flex-col gap-5 pb-20 pt-12 text-[15px] leading-relaxed md:pt-20">
+      <header className="mb-8 flex flex-col gap-5">
         <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 text-[13px] font-medium text-zinc-400">
             {heroData.initials}
@@ -88,35 +93,65 @@ export default async function Home() {
       </header>
 
       {contributions && (
-        <section>
+        <section className={panelClass}>
           <ContributionGraph contributions={contributions} />
         </section>
       )}
 
-      <section className="flex flex-col gap-3.5">
+      <section className={panelClass}>
         <h2 className="text-sm font-medium text-zinc-400">Projects</h2>
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-          {projectData.map((project) => (
-            <a
-              key={project.name}
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-start gap-3.5 rounded-xl border border-zinc-900 bg-[#111114] p-4 transition-colors hover:border-zinc-700"
-            >
-              <ProjectLogo name={project.logo} hue={project.hue} />
-              <div className="flex flex-col gap-0.5">
-                <span className="font-medium text-zinc-100">{project.name}</span>
-                <span className="text-sm leading-snug text-zinc-400">{project.tagline}</span>
+        {/* Negative margin lets the hover background bleed past the column edge while text stays aligned. */}
+        <div className="-mx-3 -mb-3 -mt-1 grid grid-cols-1 gap-1 sm:grid-cols-2">
+          {projectData.map((project) => {
+            const links = [
+              { label: "Website", href: project.site, icon: <GlobeIcon /> },
+              { label: "GitHub", href: project.github, icon: <GitHubIcon /> },
+            ].filter((link) => link.href) as { label: string; href: string; icon: React.ReactNode }[];
+
+            return (
+              <div
+                key={project.name}
+                className="group relative flex items-start gap-3.5 rounded-xl p-3 transition-colors hover:bg-zinc-900/60"
+              >
+                <ProjectLogo name={project.logo} hue={project.hue} />
+                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <div className="flex items-start justify-between gap-2">
+                    {/* The name link stretches over the whole tile; the icons sit above it. */}
+                    <a
+                      href={links[0].href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-zinc-100 after:absolute after:inset-0 after:rounded-xl"
+                    >
+                      {project.name}
+                    </a>
+                    <div className="relative -mr-1 -mt-0.5 flex shrink-0">
+                      {links.map((link) => (
+                        <a
+                          key={link.label}
+                          href={link.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${project.name} ${link.label}`}
+                          title={link.label}
+                          className="rounded-md p-1 text-zinc-500 transition-colors hover:text-zinc-100"
+                        >
+                          {link.icon}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                  <span className="text-sm leading-snug text-zinc-400">{project.tagline}</span>
+                </div>
               </div>
-            </a>
-          ))}
+            );
+          })}
         </div>
       </section>
 
-      <section className="flex flex-col gap-3.5">
+      <section className={panelClass}>
         <h2 className="text-sm font-medium text-zinc-400">Work</h2>
-        <div>
+        <div className={rowsClass}>
           {experiences.map((job) => (
             <div key={job.company} className={rowClass}>
               <span>
@@ -137,14 +172,14 @@ export default async function Home() {
       </section>
 
       {posts.length > 0 && (
-        <section className="flex flex-col gap-3.5">
+        <section className={panelClass}>
           <div className="flex items-baseline justify-between">
             <h2 className="text-sm font-medium text-zinc-400">Writing</h2>
             <Link href="/blog" className="text-[13px] text-zinc-400 transition-colors hover:text-zinc-100">
               All posts →
             </Link>
           </div>
-          <div>
+          <div className={rowsClass}>
             {posts.slice(0, 3).map((post) => (
               <Link
                 key={post.id}

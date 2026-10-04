@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,13 +15,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body
-        className={`relative bg-zinc-950 text-zinc-800 antialiased dark:text-zinc-200 ${GeistSans.className} ${GeistMono.variable}`}
-      >
-        <div className="container flex min-h-screen flex-col py-4 md:w-[45rem] md:py-8">
-          {children}
-        </div>
+    // next-themes sets the theme class on <html> before React hydrates.
+    <html lang="en" suppressHydrationWarning>
+      <body className={`relative bg-page text-ink antialiased ${GeistSans.className} ${GeistMono.variable}`}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <div className="container flex min-h-screen flex-col py-4 md:w-[45rem] md:py-8">
+            {children}
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

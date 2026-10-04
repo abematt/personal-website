@@ -24,8 +24,8 @@ const PATHS: Record<ProjectLogoName, React.ReactNode> = {
 export function ProjectLogo({ name, hue }: { name: ProjectLogoName; hue: number }) {
   return (
     <div
-      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-zinc-800 bg-zinc-900"
-      style={{ color: `oklch(0.78 0.07 ${hue})` }}
+      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-tile-line bg-tile"
+      style={{ color: `oklch(var(--logo-l) var(--logo-c) ${hue})` }}
     >
       <svg
         width="20"

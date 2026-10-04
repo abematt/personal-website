@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Personal portfolio website and blog for Abraham Mathew, deployed at www.abrahammathew.dev. Built with Next.js 14 and Tailwind CSS with a dark theme.
+Personal portfolio website and blog for Abraham Mathew, deployed at www.abrahammathew.dev. Built with Next.js 14 and Tailwind CSS, with light and dark themes.
 
 ## Development Commands
 
@@ -19,7 +19,7 @@ npm run lint   # Run ESLint
 
 ### Tech Stack
 - **Framework**: Next.js 14 (App Router)
-- **Styling**: Tailwind CSS with dark theme (zinc-950 background)
+- **Styling**: Tailwind CSS with light/dark themes (next-themes, defaults to the system setting)
 - **CMS**: Notion (Official @notionhq/client API)
 - **Icons**: inline SVG (see [components/project-logo.tsx](components/project-logo.tsx))
 
@@ -55,11 +55,11 @@ import Navbar from '@/components/sections/header'
 - [lib/github.ts](lib/github.ts): GitHub contribution calendar, parsed from the public `github.com/users/<login>/contributions` fragment (no token; cached 1 hour; section hidden if parsing fails)
 
 **Styling Approach**:
-- Dark mode forced via `className="dark"` on `<html>` element
+- Themes: `next-themes` toggles the `dark` class on `<html>`; [components/theme-toggle.tsx](components/theme-toggle.tsx) is the System/Light/Dark switch
+- Colors are named tokens (`page`, `ink`, `ink-muted`, `line`, `panel`, `hover`, `tile`, `--heat-*`) defined for both themes in [app/globals.css](app/globals.css) and mapped in [tailwind.config.js](tailwind.config.js). Use these, not raw `zinc-*` classes, so both themes stay correct
 - Fonts: Geist Sans for body, Geist Mono (`font-mono`) for dates and counts, via the `geist` package
 - No global navbar: the homepage header holds the links, and [app/blog/layout.tsx](app/blog/layout.tsx) adds a back link on blog pages
 - Custom container: `container md:w-[45rem]` for centered content
-- Zinc color palette for dark theme consistency
 - Prose styles for blog content
 
 ### Image Handling

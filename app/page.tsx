@@ -5,6 +5,7 @@ import { experiences } from "@/components/data/experience";
 import { ContributionGraph } from "@/components/contribution-graph";
 import { ProjectLogo } from "@/components/project-logo";
 import { GitHubIcon, GlobeIcon } from "@/components/icons";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { getContributions } from "@/lib/github";
 import { getPosts } from "@/lib/notion-posts";
 
@@ -28,10 +29,10 @@ function formatPostDate(date: string) {
 
 // Each section sits in a softly bordered panel with a faint highlight on its top edge.
 const panelClass =
-  "flex flex-col gap-3.5 rounded-2xl border border-zinc-800/70 bg-zinc-900/20 p-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] sm:p-5";
+  "flex flex-col gap-3.5 rounded-2xl border border-line bg-panel p-4 shadow-panel sm:p-5";
 const rowClass = "flex flex-wrap justify-between gap-x-4 gap-y-1 py-2.5";
-const rowsClass = "-my-2.5 divide-y divide-zinc-800/60";
-const dateClass = "font-mono text-[13px] text-zinc-400";
+const rowsClass = "-my-2.5 divide-y divide-line";
+const dateClass = "font-mono text-[13px] text-ink-muted";
 
 export default async function Home() {
   const [contributions, posts] = await Promise.all([
@@ -46,23 +47,24 @@ export default async function Home() {
     <main className="mx-auto flex w-full max-w-[600px] flex-col gap-5 pb-20 pt-12 text-[15px] leading-relaxed md:pt-20">
       <header className="mb-8 flex flex-col gap-5">
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 text-[13px] font-medium text-zinc-400">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-tile-line bg-tile text-[13px] font-medium text-ink-muted">
             {heroData.initials}
           </div>
-          <div>
-            <h1 className="text-lg font-semibold tracking-tight">{heroData.name}</h1>
-            <p className="text-sm text-zinc-400">
+          <div className="flex-1">
+            <h1 className="text-lg font-semibold tracking-tight text-ink-strong">{heroData.name}</h1>
+            <p className="text-sm text-ink-muted">
               {heroData.role} · {heroData.location}
             </p>
           </div>
+          <ThemeToggle />
         </div>
-        <p className="text-zinc-300 [text-wrap:pretty]">
+        <p className="text-ink [text-wrap:pretty]">
           I build full-stack web apps and AI tools at{" "}
           <a
             href="https://measureprotocol.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="border-b border-zinc-700 text-zinc-100 transition-colors hover:border-zinc-400"
+            className="border-b border-line-strong text-ink-strong transition-colors hover:border-ink-subtle"
           >
             Measure Protocol
           </a>
@@ -75,7 +77,7 @@ export default async function Home() {
                 key={link.label}
                 href={link.href}
                 {...(link.external && { target: "_blank", rel: "noopener noreferrer" })}
-                className="text-zinc-400 transition-colors hover:text-zinc-100"
+                className="text-ink-muted transition-colors hover:text-ink-strong"
               >
                 {link.label}
               </a>
@@ -83,7 +85,7 @@ export default async function Home() {
               <Link
                 key={link.label}
                 href={link.href}
-                className="text-zinc-400 transition-colors hover:text-zinc-100"
+                className="text-ink-muted transition-colors hover:text-ink-strong"
               >
                 {link.label}
               </Link>
@@ -99,7 +101,7 @@ export default async function Home() {
       )}
 
       <section className={panelClass}>
-        <h2 className="text-sm font-medium text-zinc-400">Projects</h2>
+        <h2 className="text-sm font-medium text-ink-muted">Projects</h2>
         {/* Negative margin lets the hover background bleed past the column edge while text stays aligned. */}
         <div className="-mx-3 -mb-3 -mt-1 grid grid-cols-1 gap-1 sm:grid-cols-2">
           {projectData.map((project) => {
@@ -111,7 +113,7 @@ export default async function Home() {
             return (
               <div
                 key={project.name}
-                className="group relative flex items-start gap-3.5 rounded-xl p-3 transition-colors hover:bg-zinc-900/60"
+                className="group relative flex items-start gap-3.5 rounded-xl p-3 transition-colors hover:bg-hover"
               >
                 <ProjectLogo name={project.logo} hue={project.hue} />
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -121,7 +123,7 @@ export default async function Home() {
                       href={links[0].href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-medium text-zinc-100 after:absolute after:inset-0 after:rounded-xl"
+                      className="font-medium text-ink-strong after:absolute after:inset-0 after:rounded-xl"
                     >
                       {project.name}
                     </a>
@@ -134,14 +136,14 @@ export default async function Home() {
                           rel="noopener noreferrer"
                           aria-label={`${project.name} ${link.label}`}
                           title={link.label}
-                          className="rounded-md p-1 text-zinc-500 transition-colors hover:text-zinc-100"
+                          className="rounded-md p-1 text-ink-subtle transition-colors hover:text-ink-strong"
                         >
                           {link.icon}
                         </a>
                       ))}
                     </div>
                   </div>
-                  <span className="text-sm leading-snug text-zinc-400">{project.tagline}</span>
+                  <span className="text-sm leading-snug text-ink-muted">{project.tagline}</span>
                 </div>
               </div>
             );
@@ -150,7 +152,7 @@ export default async function Home() {
       </section>
 
       <section className={panelClass}>
-        <h2 className="text-sm font-medium text-zinc-400">Work</h2>
+        <h2 className="text-sm font-medium text-ink-muted">Work</h2>
         <div className={rowsClass}>
           {experiences.map((job) => (
             <div key={job.company} className={rowClass}>
@@ -160,7 +162,7 @@ export default async function Home() {
                   href={job.companyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-zinc-400 transition-colors hover:text-zinc-100"
+                  className="text-ink-muted transition-colors hover:text-ink-strong"
                 >
                   {job.shortName ?? job.company}
                 </a>
@@ -174,8 +176,8 @@ export default async function Home() {
       {posts.length > 0 && (
         <section className={panelClass}>
           <div className="flex items-baseline justify-between">
-            <h2 className="text-sm font-medium text-zinc-400">Writing</h2>
-            <Link href="/blog" className="text-[13px] text-zinc-400 transition-colors hover:text-zinc-100">
+            <h2 className="text-sm font-medium text-ink-muted">Writing</h2>
+            <Link href="/blog" className="text-[13px] text-ink-muted transition-colors hover:text-ink-strong">
               All posts →
             </Link>
           </div>
@@ -184,7 +186,7 @@ export default async function Home() {
               <Link
                 key={post.id}
                 href={`/blog/${post.slug}`}
-                className={`${rowClass} transition-colors hover:text-white`}
+                className={`${rowClass} transition-colors hover:text-ink-strong`}
               >
                 <span>{post.title}</span>
                 {post.date && (

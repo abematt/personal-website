@@ -25,16 +25,16 @@ export default async function BlogPost({ params }: { params: { slug: string } })
       : null
 
     return (
-      <article className="prose prose-lg prose-invert mx-auto max-w-4xl">
+      <article className="prose prose-lg dark:prose-invert mx-auto max-w-4xl">
         {/* Article Header */}
-        <header className="mb-8 pb-8 border-b border-zinc-800">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
+        <header className="mb-8 pb-8 border-b border-line">
+          <h1 className="text-4xl md:text-5xl font-bold text-ink-strong mb-4 leading-tight">
             {title}
           </h1>
           {formattedDate && (
             <time 
               dateTime={date || undefined} 
-              className="text-lg text-zinc-400 font-medium"
+              className="text-lg text-ink-muted font-medium"
             >
               {formattedDate}
             </time>

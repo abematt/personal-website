@@ -10,7 +10,7 @@ export function SimpleNotionRenderer({ blocks }) {
     switch (type) {
       case 'paragraph':
         return (
-          <p key={id} className="mb-4 text-zinc-200">
+          <p key={id} className="mb-4 text-ink">
             {value.rich_text.map((text, i) => (
               <span key={i}>{text.plain_text}</span>
             ))}
@@ -18,7 +18,7 @@ export function SimpleNotionRenderer({ blocks }) {
         )
       case 'heading_1':
         return (
-          <h1 key={id} className="text-3xl font-bold mb-4 text-white">
+          <h1 key={id} className="text-3xl font-bold mb-4 text-ink-strong">
             {value.rich_text.map((text, i) => (
               <span key={i}>{text.plain_text}</span>
             ))}
@@ -26,7 +26,7 @@ export function SimpleNotionRenderer({ blocks }) {
         )
       case 'heading_2':
         return (
-          <h2 key={id} className="text-2xl font-bold mb-3 text-white">
+          <h2 key={id} className="text-2xl font-bold mb-3 text-ink-strong">
             {value.rich_text.map((text, i) => (
               <span key={i}>{text.plain_text}</span>
             ))}
@@ -34,7 +34,7 @@ export function SimpleNotionRenderer({ blocks }) {
         )
       case 'heading_3':
         return (
-          <h3 key={id} className="text-xl font-bold mb-2 text-white">
+          <h3 key={id} className="text-xl font-bold mb-2 text-ink-strong">
             {value.rich_text.map((text, i) => (
               <span key={i}>{text.plain_text}</span>
             ))}
@@ -42,7 +42,7 @@ export function SimpleNotionRenderer({ blocks }) {
         )
       case 'bulleted_list_item':
         return (
-          <li key={id} className="mb-2 text-zinc-200">
+          <li key={id} className="mb-2 text-ink">
             {value.rich_text.map((text, i) => (
               <span key={i}>{text.plain_text}</span>
             ))}
@@ -50,7 +50,7 @@ export function SimpleNotionRenderer({ blocks }) {
         )
       case 'numbered_list_item':
         return (
-          <li key={id} className="mb-2 text-zinc-200">
+          <li key={id} className="mb-2 text-ink">
             {value.rich_text.map((text, i) => (
               <span key={i}>{text.plain_text}</span>
             ))}
@@ -78,7 +78,7 @@ export function SimpleNotionRenderer({ blocks }) {
               />
             </div>
             {caption && (
-              <figcaption className="text-sm text-zinc-400 text-center mt-2 italic">
+              <figcaption className="text-sm text-ink-muted text-center mt-2 italic">
                 {caption}
               </figcaption>
             )}
@@ -86,7 +86,7 @@ export function SimpleNotionRenderer({ blocks }) {
         )
       default:
         return (
-          <div key={id} className="mb-4 text-zinc-200">
+          <div key={id} className="mb-4 text-ink">
             ❓ Unsupported block ({type})
           </div>
         )

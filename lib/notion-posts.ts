@@ -1,5 +1,27 @@
 import { notion } from './notion'
 
+export interface PostSummary {
+  id: string
+  title: string
+  slug: string
+  date: string | null
+}
+
+// All posts, newest first.
+export async function getPosts(): Promise<PostSummary[]> {
+  const res = await notion.databases.query({
+    database_id: process.env.NOTION_DATABASE_ID!,
+    sorts: [{ property: 'Date', direction: 'descending' }],
+  })
+
+  return res.results.map((post: any) => ({
+    id: post.id,
+    title: post.properties.Title.title[0]?.plain_text || 'Untitled',
+    slug: post.properties.Slug?.formula?.string || '#',
+    date: post.properties.Date.date?.start ?? null,
+  }))
+}
+
 export async function getPageContentBySlug(slug: string) {
   const response = await notion.databases.query({
     database_id: process.env.NOTION_DATABASE_ID!,

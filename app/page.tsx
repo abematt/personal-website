@@ -1,146 +1,167 @@
-"use client";
-import { Projects } from "@/components/sections/projects";
-import { WorkExperience } from "@/components/sections/work-experience";
-import { useRef } from "react";
-import { motion } from "framer-motion";
+import Link from "next/link";
 import { heroData } from "@/components/data/hero";
-import { highlightTechTerms } from "@/components/utils/highlight-tech";
-import React from "react";
+import { projectData } from "@/components/data/projects";
+import { experiences } from "@/components/data/experience";
+import { ContributionGraph } from "@/components/contribution-graph";
+import { ProjectLogo } from "@/components/project-logo";
+import { getContributions } from "@/lib/github";
+import { getPosts } from "@/lib/notion-posts";
 
-export default function Home() {
-  const projectSectionRef = useRef<HTMLDivElement | null>(null);
-  const experienceSectionRef = useRef<HTMLDivElement | null>(null);
+export const revalidate = 300;
 
-  // Handle button click to scroll to sections
-  const handleScrollToProjects = () => {
-    if (projectSectionRef.current) {
-      projectSectionRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+// "Apr 2024 - Present" -> "2024 – now"
+function yearRange(duration: string) {
+  const [start, end] = duration.split(" - ");
+  const startYear = start.match(/\d{4}/)?.[0];
+  const endYear = end === "Present" ? "now" : end?.match(/\d{4}/)?.[0];
+  return `${startYear} – ${endYear}`;
+}
 
-  const handleScrollToExperience = () => {
-    if (experienceSectionRef.current) {
-      experienceSectionRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+function formatPostDate(date: string) {
+  return new Date(date).toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+const rowClass = "flex flex-wrap justify-between gap-x-4 gap-y-1 border-t border-zinc-900 py-2.5";
+const dateClass = "font-mono text-[13px] text-zinc-400";
+
+export default async function Home() {
+  const [contributions, posts] = await Promise.all([
+    getContributions(heroData.githubLogin),
+    getPosts().catch((error) => {
+      console.error("Error fetching posts:", error);
+      return [];
+    }),
+  ]);
 
   return (
-    <main className="space-y-16">
-      {/* Hero Section */}
-      <section className="py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <h1 className="text-5xl font-bold mb-6">{heroData.greeting}</h1>
-          <div className="space-y-4 text-lg text-zinc-400">
-            <p>{heroData.tagline}</p>
-            
-            {heroData.bio.map((paragraph, index) => (
-              <p key={index}>{highlightTechTerms(paragraph)}</p>
-            ))}
-            
-            {/* Hobbies section with emojis */}
-            <div className="flex flex-wrap items-center gap-2 text-sm md:text-base">
-              <span>In my free time, I enjoy</span>
-              <div className="flex flex-wrap gap-2">
-                {heroData.hobbies.map((hobby, index) => (
-                  <span key={index} className="inline-flex items-center">
-                    <span className="mr-1">{hobby.emoji}</span>
-                    <span>{hobby.text}</span>
-                    {index < heroData.hobbies.length - 1 && <span>,</span>}
-                    {index === heroData.hobbies.length - 2 && <span> and</span>}
-                  </span>
-                ))}
-              </div>
-            </div>
+    <main className="mx-auto flex w-full max-w-[600px] flex-col gap-16 pb-20 pt-12 text-[15px] leading-relaxed md:pt-20">
+      <header className="flex flex-col gap-5">
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 text-[13px] font-medium text-zinc-400">
+            {heroData.initials}
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold tracking-tight">{heroData.name}</h1>
+            <p className="text-sm text-zinc-400">
+              {heroData.role} · {heroData.location}
+            </p>
+          </div>
+        </div>
+        <p className="text-zinc-300 [text-wrap:pretty]">
+          I build full-stack web apps and AI tools at{" "}
+          <a
+            href="https://measureprotocol.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="border-b border-zinc-700 text-zinc-100 transition-colors hover:border-zinc-400"
+          >
+            Measure Protocol
+          </a>
+          , mostly in React and Python. Off the keyboard I read, run, and take photos on my phone.
+        </p>
+        <nav aria-label="Links" className="flex flex-wrap gap-x-5 gap-y-1.5 text-sm">
+          {heroData.links.map((link) =>
+            link.external || !link.href.startsWith("/") ? (
+              <a
+                key={link.label}
+                href={link.href}
+                {...(link.external && { target: "_blank", rel: "noopener noreferrer" })}
+                className="text-zinc-400 transition-colors hover:text-zinc-100"
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                key={link.label}
+                href={link.href}
+                className="text-zinc-400 transition-colors hover:text-zinc-100"
+              >
+                {link.label}
+              </Link>
+            )
+          )}
+        </nav>
+      </header>
 
-            {/* Social links */}
-            <div className="flex flex-wrap gap-4 items-center mt-2">
-              {heroData.socialLinks.map((social, index) => (
+      {contributions && (
+        <section>
+          <ContributionGraph contributions={contributions} />
+        </section>
+      )}
+
+      <section className="flex flex-col gap-3.5">
+        <h2 className="text-sm font-medium text-zinc-400">Projects</h2>
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+          {projectData.map((project) => (
+            <a
+              key={project.name}
+              href={project.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-start gap-3.5 rounded-xl border border-zinc-900 bg-[#111114] p-4 transition-colors hover:border-zinc-700"
+            >
+              <ProjectLogo name={project.logo} hue={project.hue} />
+              <div className="flex flex-col gap-0.5">
+                <span className="font-medium text-zinc-100">{project.name}</span>
+                <span className="text-sm leading-snug text-zinc-400">{project.tagline}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-3.5">
+        <h2 className="text-sm font-medium text-zinc-400">Work</h2>
+        <div>
+          {experiences.map((job) => (
+            <div key={job.company} className={rowClass}>
+              <span>
+                {job.position},{" "}
                 <a
-                  key={index}
-                  href={social.link}
+                  href={job.companyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 py-1.5 rounded-full transition-colors text-sm"
+                  className="text-zinc-400 transition-colors hover:text-zinc-100"
                 >
-                  <span className="">You can check out some of my mobile photography here:</span>
-                  <span className="text-blue-400">@{social.username}</span>
+                  {job.shortName ?? job.company}
                 </a>
-              ))}
+              </span>
+              <span className={dateClass}>{yearRange(job.duration)}</span>
             </div>
+          ))}
+        </div>
+      </section>
 
-            {/* Action buttons */}
-            <div className="flex flex-wrap gap-4 mt-6">
-              <button
-                onClick={handleScrollToExperience}
-                className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm md:text-base transition-colors"
-              >
-                See Experience
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                  <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-              </button>
-              <button
-                onClick={handleScrollToProjects}
-                className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-zinc-200 text-sm md:text-base transition-colors"
-              >
-                See Projects
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                  <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-              </button>
-            </div>
+      {posts.length > 0 && (
+        <section className="flex flex-col gap-3.5">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-sm font-medium text-zinc-400">Writing</h2>
+            <Link href="/blog" className="text-[13px] text-zinc-400 transition-colors hover:text-zinc-100">
+              All posts →
+            </Link>
           </div>
-        </motion.div>
-      </section>
-
-      {/* Experience section */}
-      <section ref={experienceSectionRef} className="pt-8">
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold mb-2">Work Experience</h2>
-          <p className="font-light text-zinc-500 dark:text-zinc-400">
-          </p>
-        </div>
-        <WorkExperience />
-      </section>
-
-      {/* Project section */}
-      <section ref={projectSectionRef} className="pt-8">
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold mb-2">Projects</h2>
-          <p className="font-light text-zinc-500 dark:text-zinc-400">
-            A list of projects I&apos;ve worked on through coursework and personal initiatives
-          </p>
-        </div>
-        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
-          <Projects />
-        </div>
-      </section>
+          <div>
+            {posts.slice(0, 3).map((post) => (
+              <Link
+                key={post.id}
+                href={`/blog/${post.slug}`}
+                className={`${rowClass} transition-colors hover:text-white`}
+              >
+                <span>{post.title}</span>
+                {post.date && (
+                  <time dateTime={post.date} className={dateClass}>
+                    {formatPostDate(post.date)}
+                  </time>
+                )}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

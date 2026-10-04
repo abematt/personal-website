@@ -1,61 +1,33 @@
+import type { ProjectLogoName } from "@/components/project-logo";
+
 interface Project {
+  name: string;
   link: string;
-  repo: string;
-  website: string;
-  description: string;
-  media: {
-    type: "image" | "gif" | "video";
-    src: string;
-    alt: string;
-    poster?: string;
-  };
+  tagline: string;
+  logo: ProjectLogoName;
+  hue: number;
 }
 
 export const projectData: Project[] = [
   {
-    link: "https://github.com/abematt/youtube-analysis",
-    repo: "Youtube Analysis",
-    website: "",
-    description: "A web application using HuggingFace.js to detect,analyze and classify sentiment of youtube videos",
-    media: {
-      type: "gif",
-      src: "/assets/youtubesentiment.gif",
-      alt: "Youtube Analysis demo",
-    },
+    name: "Claude Chat Status",
+    link: "https://github.com/abematt/claude-chat-status",
+    tagline: "Menu bar app that shows what every Claude Code chat is doing",
+    logo: "chat",
+    hue: 45,
   },
   {
-    link: "https://github.com/abematt/job-tracker-v2",
-    repo: "Job Tracker",
-    website: "",
-    description: "App created in React,Express & MongoDB to track job applications",
-    media: {
-      type: "gif",
-      src: "/assets/jobtrackergif.gif",
-      alt: "Job Tracker demo",
-      poster: "/projects/job-tracker-poster.jpg",
-    },
+    name: "Aladí Catalogue",
+    link: "https://aladi.apps.abrahammathew.com",
+    tagline: "Every English and Italian book in Barcelona's libraries, updated weekly",
+    logo: "book",
+    hue: 190,
   },
   {
-    link: "https://github.com/abematt/CMPE-259-NLP-Final-Project-Presentation",
-    repo: "Few Shot Learning with Atlas",
-    website: "https://quiet-bubblegum-a79bb1.netlify.app",
-    description:
-      "Finetuning Atlas models with custom dataset and parameter tuning for improved NLP performance with limited training examples.",
-    media: {
-      type: "video",
-      src: "/assets/fewshot.webm",
-      alt: "Few Shot Learning with Atlas Models",
-    },
+    name: "Movie Chain",
+    link: "https://github.com/abematt/movie-chain",
+    tagline: "iOS game linking films through shared actors. In progress",
+    logo: "film",
+    hue: 320,
   },
-  {
-    link: "https://github.com/abematt/272---HVAC-AnoML-Presentation",
-    repo: "HVAC AnoML",
-    website: "https://majestic-syrniki-4d8693.netlify.app/",
-    description: "Presentation for CMPE 272 class created in React",
-    media: {
-      type: "video",
-      src: "/assets/hvac.webm",
-      alt: "ML project for anomaly detection in HVAC systems",
-    },
-  },
-]; 
+];

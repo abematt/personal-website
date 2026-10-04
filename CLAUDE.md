@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Personal portfolio website and blog for Abraham Mathew, deployed at www.abrahammathew.dev. Built with Next.js 14, shadcn/ui components, and Tailwind CSS with a dark theme.
+Personal portfolio website and blog for Abraham Mathew, deployed at www.abrahammathew.dev. Built with Next.js 14 and Tailwind CSS with a dark theme.
 
 ## Development Commands
 
@@ -20,10 +20,8 @@ npm run lint   # Run ESLint
 ### Tech Stack
 - **Framework**: Next.js 14 (App Router)
 - **Styling**: Tailwind CSS with dark theme (zinc-950 background)
-- **UI Components**: shadcn/ui (Radix UI primitives)
-- **Animations**: Framer Motion
 - **CMS**: Notion (Official @notionhq/client API)
-- **Icons**: Tabler Icons, Lucide React
+- **Icons**: inline SVG (see [components/project-logo.tsx](components/project-logo.tsx))
 
 ### Key Architectural Patterns
 
@@ -48,17 +46,18 @@ import Navbar from '@/components/sections/header'
 
 **Data Layer**:
 - [lib/notion.ts](lib/notion.ts): Notion client initialization
-- [lib/notion-posts.ts](lib/notion-posts.ts): Blog post fetching logic using `getPageContentBySlug()`
+- [lib/notion-posts.ts](lib/notion-posts.ts): `getPosts()` for post lists and `getPageContentBySlug()` for a single post
 - Fetches blocks with pagination (100 blocks max per request)
 
 **Component Organization**:
-- `components/sections/`: Page sections (header, work-experience, projects)
-- `components/data/`: Static content data (hero, experience, projects)
-- `components/ui/`: Reusable UI primitives (shadcn/ui components)
-- `components/utils/`: Utility functions like `highlightTechTerms()`
+- `components/data/`: Static content data (hero links, experience, projects with tile logo + hue)
+- `components/contribution-graph.tsx`, `components/project-logo.tsx`: homepage pieces
+- [lib/github.ts](lib/github.ts): GitHub contribution calendar, parsed from the public `github.com/users/<login>/contributions` fragment (no token; cached 1 hour; section hidden if parsing fails)
 
 **Styling Approach**:
 - Dark mode forced via `className="dark"` on `<html>` element
+- Fonts: Geist Sans for body, Geist Mono (`font-mono`) for dates and counts, via the `geist` package
+- No global navbar: the homepage header holds the links, and [app/blog/layout.tsx](app/blog/layout.tsx) adds a back link on blog pages
 - Custom container: `container md:w-[45rem]` for centered content
 - Zinc color palette for dark theme consistency
 - Prose styles for blog content
@@ -81,7 +80,7 @@ REVALIDATE_SECRET=      # Secret for revalidation webhook
 ## Important Patterns
 
 **Client/Server Components**:
-- Main page is client component (`'use client'`) for Framer Motion and scroll refs
+- Main page is a server component (ISR, 300s) that fetches GitHub contributions and the latest posts
 - Blog pages are server components for data fetching
 - ClientNotion.jsx is client component for interactive rendering
 
@@ -95,10 +94,14 @@ REVALIDATE_SECRET=      # Secret for revalidation webhook
 - Unsupported blocks show "Unsupported block" message
 - Images handle both external URLs and Notion-hosted files
 
+## Design Reference Bank
+
+Abraham collects other personal websites as design inspiration in [docs/design-references.md](docs/design-references.md). When a reference URL gets dropped in (often with no instructions), fetch the site and add a new entry at the top of that file using the same format as the existing ones. Leave `Verdict` blank for Abraham to fill in. When asked to review, compare, or borrow from the references, start from that file.
+
 ## Key Files
 
-- [app/layout.tsx](app/layout.tsx): Root layout with Navbar, metadata, dark theme
-- [app/page.tsx](app/page.tsx): Homepage with hero, work experience, projects
+- [app/layout.tsx](app/layout.tsx): Root layout with metadata, fonts, dark theme
+- [app/page.tsx](app/page.tsx): Homepage: header, contributions, project tiles, work, writing
 - [app/blog/page.tsx](app/blog/page.tsx): Blog index with posts from Notion
 - [app/blog/[slug]/page.tsx](app/blog/[slug]/page.tsx): Individual blog post pages
 - [components/ClientNotion.jsx](components/ClientNotion.jsx): Custom Notion block renderer

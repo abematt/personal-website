@@ -40,7 +40,7 @@ import { ThemeToggle } from '@/components/theme-toggle'
 - Colors are named tokens (`page`, `ink`, `ink-muted`, `line`, `panel`, `hover`, `tile`, `--heat-*`) defined for both themes in [app/globals.css](app/globals.css) and mapped in [tailwind.config.js](tailwind.config.js). Use these, not raw `zinc-*` classes, so both themes stay correct
 - Fonts: Geist Sans for body, Geist Mono (`font-mono`) for dates and counts, via the `geist` package
 - No global navbar: the homepage header holds the links
-- Custom container: `container md:w-[45rem]` for centered content
+- Centered column: `mx-auto w-full px-8 md:w-[45rem]` on the root layout wrapper (no Tailwind `container` plugin config)
 
 ## Important Patterns
 

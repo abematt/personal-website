@@ -19,7 +19,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`relative bg-page text-ink antialiased ${GeistSans.className} ${GeistMono.variable}`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <div className="container flex min-h-screen flex-col py-4 md:w-[45rem] md:py-8">
+          <div className="mx-auto flex min-h-screen w-full flex-col px-8 py-4 md:w-[45rem] md:py-8">
             {children}
           </div>
         </ThemeProvider>

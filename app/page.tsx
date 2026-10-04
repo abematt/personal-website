@@ -7,9 +7,8 @@ import { ProjectLogo } from "@/components/project-logo";
 import { GitHubIcon, GlobeIcon } from "@/components/icons";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { getContributions } from "@/lib/github";
-import { getPosts } from "@/lib/notion-posts";
 
-export const revalidate = 300;
+export const revalidate = 3600;
 
 // "Apr 2024 - Present" -> "2024 – now"
 function yearRange(duration: string) {
@@ -17,14 +16,6 @@ function yearRange(duration: string) {
   const startYear = start.match(/\d{4}/)?.[0];
   const endYear = end === "Present" ? "now" : end?.match(/\d{4}/)?.[0];
   return `${startYear} – ${endYear}`;
-}
-
-function formatPostDate(date: string) {
-  return new Date(date).toLocaleDateString("en-US", {
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  });
 }
 
 // Each section sits in a softly bordered panel with a faint highlight on its top edge.
@@ -35,13 +26,7 @@ const rowsClass = "-my-2.5 divide-y divide-line";
 const dateClass = "font-mono text-[13px] text-ink-muted";
 
 export default async function Home() {
-  const [contributions, posts] = await Promise.all([
-    getContributions(heroData.githubLogin),
-    getPosts().catch((error) => {
-      console.error("Error fetching posts:", error);
-      return [];
-    }),
-  ]);
+  const contributions = await getContributions(heroData.githubLogin);
 
   return (
     <main className="mx-auto flex w-full max-w-[600px] flex-col gap-5 pb-20 pt-12 text-[15px] leading-relaxed md:pt-20">
@@ -173,32 +158,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {posts.length > 0 && (
-        <section className={panelClass}>
-          <div className="flex items-baseline justify-between">
-            <h2 className="text-sm font-medium text-ink-muted">Writing</h2>
-            <Link href="/blog" className="text-[13px] text-ink-muted transition-colors hover:text-ink-strong">
-              All posts →
-            </Link>
-          </div>
-          <div className={rowsClass}>
-            {posts.slice(0, 3).map((post) => (
-              <Link
-                key={post.id}
-                href={`/blog/${post.slug}`}
-                className={`${rowClass} transition-colors hover:text-ink-strong`}
-              >
-                <span>{post.title}</span>
-                {post.date && (
-                  <time dateTime={post.date} className={dateClass}>
-                    {formatPostDate(post.date)}
-                  </time>
-                )}
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
     </main>
   );
 }

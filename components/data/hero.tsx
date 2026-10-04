@@ -28,7 +28,6 @@ export const heroData: HeroContent = {
       href: "/resume.pdf",
       external: true,
     },
-    { label: "Blog", href: "/blog" },
     { label: "Photos", href: "https://www.instagram.com/light.onstuff/", external: true },
   ],
 };

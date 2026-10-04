@@ -94,6 +94,13 @@ REVALIDATE_SECRET=      # Secret for revalidation webhook
 - Unsupported blocks show "Unsupported block" message
 - Images handle both external URLs and Notion-hosted files
 
+## Self-hosted apps (separate)
+
+Some side projects are self-hosted under `*.apps.abrahammathew.com` (Aladí, for
+example, is linked from the homepage's project tiles). Each lives in its own
+repo and is built and deployed from there, not from this one. This site only
+links to the public ones.
+
 ## Design Reference Bank
 
 Abraham collects other personal websites as design inspiration in [docs/design-references.md](docs/design-references.md). When a reference URL gets dropped in (often with no instructions), fetch the site and add a new entry at the top of that file using the same format as the existing ones. Leave `Verdict` blank for Abraham to fill in. When asked to review, compare, or borrow from the references, start from that file.

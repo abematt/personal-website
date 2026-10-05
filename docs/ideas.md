@@ -12,6 +12,7 @@ A running list of things to try on the site. Add freely, prune often. Move an it
 
 ## Someday
 
+- [ ] **Views counter**, on the homepage or per post once the new writing system exists. anishfn.ink shows a running count as a live sign of activity (same spirit as its guestbook signature count). Needs a tiny store, so pair it with whatever backs the guestbook, or the apps box.
 - [ ] **Guestbook**: visitors leave a message, draw a signature on a canvas, running count of signatures.
 - [ ] **Theme-aware favicon** that follows light/dark.
 - [ ] **Photos section**: a small phone-photo grid, since the intro already mentions it.
